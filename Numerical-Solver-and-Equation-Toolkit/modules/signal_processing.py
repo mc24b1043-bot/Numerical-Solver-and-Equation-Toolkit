@@ -13,3 +13,16 @@ def spectrum(y,fs):
 def filter_signal(y,fs,cutoff,kind="Low-pass",order=4):
  if not 0<cutoff<fs/2:raise ValueError("Cutoff must be below Nyquist.")
  return signal.sosfiltfilt(signal.butter(order,cutoff,btype="lowpass" if kind=="Low-pass" else "highpass",fs=fs,output="sos"),y)
+
+
+def combine_signals(first, second, operation="Addition"):
+    """Add or multiply two sampled signals with matching lengths."""
+    a,b=np.asarray(first),np.asarray(second)
+    if a.shape!=b.shape: raise ValueError("Signals must have matching sample counts.")
+    if operation=="Addition": return a+b
+    if operation=="Multiplication": return a*b
+    raise ValueError("Operation must be Addition or Multiplication.")
+
+def convolve_signals(first, second):
+    """Discrete linear convolution, evaluated by NumPy."""
+    return np.convolve(np.asarray(first),np.asarray(second),mode="full")

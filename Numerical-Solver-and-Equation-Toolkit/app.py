@@ -5,7 +5,7 @@ import numpy as np,pandas as pd,plotly.graph_objects as go,streamlit as st,sympy
 from modules import numerical_analysis as n
 from modules.differential_equations import solve_ode
 from modules.linear_systems import analyze_transfer_function
-from modules.signal_processing import make_signal,add_noise,spectrum,filter_signal
+from modules.signal_processing import make_signal,add_noise,spectrum,filter_signal,combine_signals,convolve_signals
 from modules.system_simulator import mass_spring_damper,rlc_response,first_order
 from utils.validation import parse_vector
 from utils.pdf_generator import make_report
@@ -91,6 +91,17 @@ def signals():
   try:
    t,y=make_signal(wave,amp,freq,fs,2,phase);yn=add_noise(y,noise);yf=filter_signal(yn,fs,cut,ft);xx,sp0=spectrum(y,fs);_,sp1=spectrum(yn,fs);chart(pd.DataFrame({"Time":t,"Original":y,"Noisy":yn,"Filtered":yf}),"Time",["Original","Noisy","Filtered"],"Time domain");chart(pd.DataFrame({"Frequency":xx,"Original":sp0,"Noisy":sp1}),"Frequency",["Original","Noisy"],"One-sided FFT amplitude");st.info("FFT maps sampled data to frequency bins. Butterworth filters provide a smooth passband; forward-backward filtering avoids phase delay.");pdf("Signal processing",Waveform=wave,Amplitude=amp,Frequency=freq,Sampling=fs,Noise=noise,Filter=ft,Cutoff=cut)
   except Exception as e:st.error(str(e))
+ with st.expander("Signal addition, multiplication and convolution"):
+  f2=st.number_input("Second signal frequency (Hz)",value=8.0,min_value=.01,key="sig_f2")
+  operation=st.selectbox("Pointwise operation",["Addition","Multiplication"],key="sig_op")
+  if st.button("Compute signal operation",key="sig_compute"):
+   try:
+    _,y1=make_signal(wave,amp,freq,fs,2,phase);_,y2=make_signal(wave,amp,f2,fs,2,phase)
+    combined=combine_signals(y1,y2,operation);conv=convolve_signals(y1[:min(100,len(y1))],y2[:min(100,len(y2))])
+    chart(pd.DataFrame({"Time":t,"Combined":combined}),"Time",["Combined"],f"Pointwise {operation.lower()}")
+    chart(pd.DataFrame({"Sample index":np.arange(len(conv)),"Convolution":conv}),"Sample index",["Convolution"],"Discrete linear convolution")
+   except Exception as e:st.error(str(e))
+
 def differential():
  header("Module 04","Differential equations","Compare Euler, modified Euler (Heun) and fourth-order Runge-Kutta.")
  a,b=st.columns(2);rhs=a.text_input("dy/dt =","-2*y");y0=a.number_input("Initial y",value=1.);exact=a.text_input("Exact y(t), optional","exp(-2*t)");t0=b.number_input("t",value=0.);tf=b.number_input("t final",value=2.);h=b.number_input("Step size",value=.2,min_value=.001)

@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parent))
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0,str(ROOT))
 import numpy as np,pandas as pd,plotly.graph_objects as go,streamlit as st,sympy as sp
 from modules import numerical_analysis as n
 from modules.differential_equations import solve_ode
@@ -150,3 +151,4 @@ def about():
  st.write("Limitations: the scalar ODE solver expects explicit dy/dt=f(t,y). Root methods depend on brackets or initial values. System responses assume continuous-time LTI models. Inputs and units are the user's responsibility.")
 pagefn={"Dashboard":dashboard,"Numerical Analysis":numerical,"Linear Systems":linear,"Signal Processing":signals,"Differential Equations":differential,"System Simulator":simulator,"Intelligent Analyzer":analyzer,"About Project":about}
 pagefn[page]()
+
